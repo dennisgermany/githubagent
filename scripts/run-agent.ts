@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { Agent, CursorAgentError, type AgentOptions, type Run } from "@cursor/sdk";
 import {
+  flushStreamLogs,
   logConversationStep,
   logDebug,
   logError,
@@ -9,6 +10,7 @@ import {
   logInteractionDelta,
   logStreamMessage,
   logWarn,
+  resetStreamLogs,
 } from "./agent-logger.js";
 
 const apiKey = process.env.CURSOR_API_KEY;
@@ -57,8 +59,12 @@ async function consumeStream(run: Run): Promise<void> {
     return;
   }
 
-  for await (const message of run.stream()) {
-    logStreamMessage(message);
+  try {
+    for await (const message of run.stream()) {
+      logStreamMessage(message);
+    }
+  } finally {
+    flushStreamLogs("stream_closed");
   }
 }
 
@@ -69,6 +75,8 @@ logDebug("agent", `Prompt length: ${prompt.length} characters`);
 try {
   await using agent = await Agent.create(buildAgentOptions());
   logInfo("agent", `Agent created: ${agent.agentId}`);
+
+  resetStreamLogs();
 
   const run = await agent.send(prompt, {
     onStep: ({ step }) => {
@@ -82,6 +90,7 @@ try {
   logInfo("run", `Run started: ${run.id}`);
 
   const [result] = await Promise.all([run.wait(), consumeStream(run)]);
+  flushStreamLogs("run_finished");
 
   logInfo("run", `Run finished: ${result.id}`, {
     status: result.status,

@@ -46,7 +46,7 @@ Optional environment variables:
 | `AGENT_LOG_LEVEL` | `info` | `error` · `warn` · `info` · `debug` |
 | `AGENT_LOG_FORMAT` | text | Set to `json` for JSON lines on stderr |
 
-Logs (thinking, tools, status, steps) go to **stderr**; the final agent summary is printed to **stdout** after the run completes.
+Logs (thinking, tools, status, steps) go to **stderr**. Streaming text is **buffered** and printed as whole paragraphs (not one line per token). Token-level detail is available with `AGENT_LOG_LEVEL=debug`. The final agent summary is printed to **stdout** after the run completes.
 
 ## Future races
 

@@ -13,6 +13,9 @@ const LEVEL_RANK: Record<LogLevel, number> = {
   debug: 3,
 };
 
+const THINKING_PREVIEW_CHARS = 2000;
+const ASSISTANT_PREVIEW_CHARS = 2000;
+
 function activeLevel(): LogLevel {
   const raw = process.env.AGENT_LOG_LEVEL?.trim().toLowerCase();
   if (raw === "error" || raw === "warn" || raw === "info" || raw === "debug") {
@@ -52,6 +55,39 @@ function write(level: LogLevel, tag: string, message: string, extra?: object): v
   }
 }
 
+/** One timestamp; body indented on following lines (avoids per-token log lines). */
+function writeBlock(
+  level: LogLevel,
+  tag: string,
+  text: string,
+  meta?: string,
+): void {
+  if (!enabled(level)) return;
+
+  const trimmed = text.trim();
+  if (!trimmed) return;
+
+  const label = meta ? `${tag} — ${meta}` : tag;
+
+  if (useJsonFormat()) {
+    write(level, tag, trimmed, meta ? { meta } : undefined);
+    return;
+  }
+
+  const prefix = `[${new Date().toISOString()}] [${level.toUpperCase()}]`;
+  const header =
+    trimmed.length <= 120 && !trimmed.includes("\n")
+      ? `${prefix} [${label}] ${trimmed}`
+      : `${prefix} [${label}]`;
+
+  console.error(header);
+  if (trimmed.length > 120 || trimmed.includes("\n")) {
+    for (const line of trimmed.split("\n")) {
+      console.error(`${prefix}   ${line}`);
+    }
+  }
+}
+
 export function logError(tag: string, message: string, extra?: object): void {
   write("error", tag, message, extra);
 }
@@ -68,12 +104,78 @@ export function logDebug(tag: string, message: string, extra?: object): void {
   write("debug", tag, message, extra);
 }
 
-const THINKING_PREVIEW_CHARS = 2000;
-
 function preview(text: string, max = THINKING_PREVIEW_CHARS): string {
   const trimmed = text.trim();
   if (trimmed.length <= max) return trimmed;
   return `${trimmed.slice(0, max)}… (${trimmed.length} chars total)`;
+}
+
+function mergeStreamChunk(buffer: string, chunk: string): string {
+  if (!chunk) return buffer;
+  if (!buffer) return chunk;
+  if (chunk.startsWith(buffer)) return chunk;
+  if (buffer.startsWith(chunk)) return buffer;
+  if (buffer.endsWith(chunk) || buffer.includes(chunk)) return buffer;
+  return buffer + chunk;
+}
+
+class StreamLogAggregator {
+  private assistantBuffer = "";
+  private thinkingBuffer = "";
+  private lastAssistantLogged = "";
+  private lastThinkingLogged = "";
+
+  appendAssistant(chunk: string): void {
+    this.assistantBuffer = mergeStreamChunk(this.assistantBuffer, chunk);
+    if (enabled("debug")) {
+      logDebug("assistant-delta", chunk);
+    }
+  }
+
+  appendThinking(chunk: string): void {
+    this.thinkingBuffer = mergeStreamChunk(this.thinkingBuffer, chunk);
+    if (enabled("debug")) {
+      logDebug("thinking-delta", chunk);
+    }
+  }
+
+  flushAssistant(reason: string): void {
+    const text = this.assistantBuffer.trim();
+    this.assistantBuffer = "";
+    if (!text || text === this.lastAssistantLogged) return;
+    this.lastAssistantLogged = text;
+    writeBlock("info", "assistant", preview(text, ASSISTANT_PREVIEW_CHARS), reason);
+  }
+
+  flushThinking(reason: string): void {
+    const text = this.thinkingBuffer.trim();
+    this.thinkingBuffer = "";
+    if (!text || text === this.lastThinkingLogged) return;
+    this.lastThinkingLogged = text;
+    writeBlock("info", "thinking", preview(text), reason);
+  }
+
+  hasLoggedAssistant(text: string): boolean {
+    return text.trim() === this.lastAssistantLogged;
+  }
+
+  reset(): void {
+    this.assistantBuffer = "";
+    this.thinkingBuffer = "";
+    this.lastAssistantLogged = "";
+    this.lastThinkingLogged = "";
+  }
+}
+
+let streamAggregator = new StreamLogAggregator();
+
+export function resetStreamLogs(): void {
+  streamAggregator.reset();
+}
+
+export function flushStreamLogs(reason = "end"): void {
+  streamAggregator.flushAssistant(reason);
+  streamAggregator.flushThinking(reason);
 }
 
 function summarizeToolArgs(
@@ -97,14 +199,24 @@ function summarizeToolArgs(
 
 export function logConversationStep(step: ConversationStep): void {
   switch (step.type) {
-    case "assistantMessage":
-      logInfo(
-        "step",
-        `Assistant (${step.message.text.length} chars)`,
-        enabled("debug") ? { text: step.message.text } : undefined,
-      );
+    case "assistantMessage": {
+      const text = step.message.text.trim();
+      if (!text) return;
+      streamAggregator.flushAssistant("step");
+      streamAggregator.flushThinking("step");
+      if (!streamAggregator.hasLoggedAssistant(text)) {
+        writeBlock(
+          "info",
+          "step",
+          preview(text, ASSISTANT_PREVIEW_CHARS),
+          `${text.length} chars`,
+        );
+      }
       break;
+    }
     case "toolCall": {
+      streamAggregator.flushAssistant("step");
+      streamAggregator.flushThinking("step");
       const tool = step.message;
       const summary = summarizeToolArgs(
         tool.type,
@@ -135,30 +247,29 @@ export function logConversationStep(step: ConversationStep): void {
 
 export function logInteractionDelta(update: InteractionUpdate): void {
   const kind = (update as { type?: string }).type;
+  const deltaText =
+    (update as { text?: string }).text ?? (update as { delta?: string }).delta ?? "";
+
   switch (kind) {
     case "thinking-delta":
-    case "thinkingDelta": {
-      const text = (update as { text?: string; delta?: string }).text
-        ?? (update as { delta?: string }).delta
-        ?? "";
-      if (text) logInfo("thinking-delta", text);
+    case "thinkingDelta":
+      if (deltaText) streamAggregator.appendThinking(deltaText);
       break;
-    }
     case "thinking-completed":
     case "thinkingCompleted":
+      streamAggregator.flushThinking("completed");
       logInfo("thinking", "Thinking completed", {
         durationMs: (update as { thinkingDurationMs?: number }).thinkingDurationMs,
       });
       break;
     case "text-delta":
-    case "textDelta": {
-      const text = (update as { text?: string; delta?: string }).text
-        ?? (update as { delta?: string }).delta;
-      if (text && enabled("debug")) logDebug("text-delta", text);
+    case "textDelta":
+      if (deltaText) streamAggregator.appendAssistant(deltaText);
       break;
-    }
     case "tool-call-started":
     case "toolCallStarted":
+      streamAggregator.flushAssistant("tool_started");
+      streamAggregator.flushThinking("tool_started");
       logInfo("delta", "Tool call started", {
         name: (update as { toolName?: string; name?: string }).toolName
           ?? (update as { name?: string }).name,
@@ -170,6 +281,8 @@ export function logInteractionDelta(update: InteractionUpdate): void {
       break;
     case "turn-ended":
     case "turnEnded":
+      streamAggregator.flushAssistant("turn_ended");
+      streamAggregator.flushThinking("turn_ended");
       logInfo("delta", "Turn ended");
       break;
     default:
@@ -187,17 +300,19 @@ export function logStreamMessage(message: SDKMessage): void {
       });
       break;
     case "status":
+      streamAggregator.flushAssistant("status");
+      streamAggregator.flushThinking("status");
       logInfo("stream", `Status ${message.status}`, {
         runId: message.run_id,
         detail: message.message,
       });
       break;
     case "thinking": {
-      const duration =
-        message.thinking_duration_ms != null
-          ? ` (${message.thinking_duration_ms}ms)`
-          : "";
-      logInfo("thinking", `Thinking${duration}: ${preview(message.text)}`);
+      streamAggregator.flushAssistant("thinking");
+      if (message.text.trim()) {
+        streamAggregator.appendThinking(message.text);
+      }
+      streamAggregator.flushThinking("message");
       if (enabled("debug") && message.text.length > THINKING_PREVIEW_CHARS) {
         logDebug("thinking", message.text);
       }
@@ -205,9 +320,10 @@ export function logStreamMessage(message: SDKMessage): void {
     }
     case "assistant": {
       for (const block of message.message.content) {
-        if (block.type === "text" && block.text.trim()) {
-          logInfo("assistant", preview(block.text, 500));
+        if (block.type === "text" && block.text) {
+          streamAggregator.appendAssistant(block.text);
         } else if (block.type === "tool_use") {
+          streamAggregator.flushAssistant("tool_use");
           logInfo("assistant", `Planning tool: ${block.name}`, {
             id: block.id,
             input: enabled("debug") ? block.input : undefined,
@@ -217,6 +333,8 @@ export function logStreamMessage(message: SDKMessage): void {
       break;
     }
     case "tool_call":
+      streamAggregator.flushAssistant("tool_call");
+      streamAggregator.flushThinking("tool_call");
       logInfo(
         "tool",
         `${message.name} [${message.status}]`,
