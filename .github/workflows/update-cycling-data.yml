@@ -41,5 +41,8 @@ jobs:
       - name: Publish data changes as pull request
         env:
           BOT_BRANCH: bot/giro-d-italia-2026
-          GH_TOKEN: ${{ github.token }}
+          # GH_PR_TOKEN (optional PAT) when the repo disallows GITHUB_TOKEN from creating PRs.
+          GH_TOKEN: ${{ secrets.GH_PR_TOKEN || github.token }}
+          GITHUB_SERVER_URL: ${{ github.server_url }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
         run: bash scripts/publish-data-pr.sh

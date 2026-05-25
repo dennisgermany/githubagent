@@ -10,7 +10,11 @@ Daily [Cursor SDK](https://cursor.com/docs/sdk/typescript) agent (local runtime 
 ## Setup
 
 1. Add repository secret **`CURSOR_API_KEY`** ([Cursor dashboard](https://cursor.com/dashboard)).
-2. Ensure Actions can create PRs (default `GITHUB_TOKEN` with `contents: write` and `pull-requests: write` is configured in the workflow).
+2. Allow the workflow to **open pull requests** (required for automatic PRs):
+   - **Recommended:** GitHub repo → **Settings** → **Actions** → **General** → **Workflow permissions** → enable **Allow GitHub Actions to create and approve pull requests**, then save.
+   - **Alternative:** Add secret **`GH_PR_TOKEN`** — a fine-grained or classic PAT with `contents` and `pull_requests` on this repo. The workflow uses it instead of `GITHUB_TOKEN` for `gh pr create`.
+
+   If PR creation is blocked, the workflow still **pushes** `bot/giro-d-italia-2026` and prints a compare link in the log; open the PR manually once.
 
 ## What gets updated
 
