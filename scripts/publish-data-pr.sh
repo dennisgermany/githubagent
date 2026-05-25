@@ -65,36 +65,81 @@ EOF
 )"
 }
 
-if [[ "$(open_pr_count)" != "0" ]]; then
-  echo "Open pull request already exists for ${BOT_BRANCH}; push updated it."
+ensure_pr() {
+  if [[ "$(open_pr_count)" != "0" ]]; then
+    echo "Open pull request already exists for ${BOT_BRANCH}; push updated it."
+    return 0
+  fi
+
+  set +e
+  create_pr
+  local create_err=$?
+  set -e
+
+  if [[ "${create_err}" -eq 0 ]]; then
+    echo "Created new pull request for branch ${BOT_BRANCH}."
+    return 0
+  fi
+
+  compare_link="$(pr_url || true)"
+  echo "::warning::Could not create pull request automatically (exit ${create_err})." >&2
+  echo "" >&2
+  echo "GitHub often blocks PR creation from the default GITHUB_TOKEN unless the repo allows it." >&2
+  echo "" >&2
+  echo "Fix (pick one):" >&2
+  echo "  1. Repo Settings → Actions → General → Workflow permissions" >&2
+  echo "     → enable \"Allow GitHub Actions to create and approve pull requests\"" >&2
+  echo "  2. Add secret GH_PR_TOKEN (repo + pull_requests) and re-run." >&2
+  echo "" >&2
+  if [[ -n "${compare_link}" ]]; then
+    echo "Open a PR manually: ${compare_link}" >&2
+  fi
+  return 1
+}
+
+merge_pr() {
+  local pr_number
+  pr_number="$(gh pr view "${BOT_BRANCH}" --json number --jq .number 2>/dev/null)" || {
+    echo "::warning::No open PR found for ${BOT_BRANCH}; skipping merge." >&2
+    return 1
+  }
+
+  echo "Merging pull request #${pr_number}…"
+
+  set +e
+  gh pr review "${pr_number}" --approve 2>/dev/null
+  set -e
+
+  set +e
+  gh pr merge "${pr_number}" --merge --admin --delete-branch
+  local merge_err=$?
+  set -e
+
+  if [[ "${merge_err}" -eq 0 ]]; then
+    echo "Merged PR #${pr_number} (branch ${BOT_BRANCH} deleted)."
+    return 0
+  fi
+
+  set +e
+  gh pr merge "${pr_number}" --merge --delete-branch
+  merge_err=$?
+  set -e
+
+  if [[ "${merge_err}" -eq 0 ]]; then
+    echo "Merged PR #${pr_number} (branch ${BOT_BRANCH} deleted)."
+    return 0
+  fi
+
+  echo "::warning::Could not merge PR #${pr_number} (exit ${merge_err})." >&2
+  echo "Common causes: branch protection, required reviews, or failing checks." >&2
+  echo "Merge manually: $(gh pr view "${pr_number}" --json url --jq .url 2>/dev/null || echo "(see PR on GitHub)")" >&2
+  return 1
+}
+
+if ! ensure_pr; then
   exit 0
 fi
 
-set +e
-create_pr
-create_err=$?
-set -e
-
-if [[ "${create_err}" -eq 0 ]]; then
-  echo "Created new pull request for branch ${BOT_BRANCH}."
+if ! merge_pr; then
   exit 0
 fi
-
-compare_link="$(pr_url || true)"
-
-echo "::warning::Could not create pull request automatically (exit ${create_err})." >&2
-echo "" >&2
-echo "GitHub often blocks PR creation from the default GITHUB_TOKEN unless the repo allows it." >&2
-echo "" >&2
-echo "Fix (pick one):" >&2
-echo "  1. Repo Settings → Actions → General → Workflow permissions" >&2
-echo "     → enable \"Allow GitHub Actions to create and approve pull requests\"" >&2
-echo "  2. Add a fine-grained or classic PAT as secret GH_PR_TOKEN (repo + pull_requests)" >&2
-echo "     and re-run the workflow." >&2
-echo "" >&2
-if [[ -n "${compare_link}" ]]; then
-  echo "Open a PR manually: ${compare_link}" >&2
-fi
-
-# Push succeeded; do not fail the workflow for PR policy restrictions.
-exit 0

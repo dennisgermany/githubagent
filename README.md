@@ -1,20 +1,20 @@
 # Giro cycling data agent
 
-Daily [Cursor SDK](https://cursor.com/docs/sdk/typescript) agent (local runtime on GitHub Actions) that updates **Giro d'Italia 2026** results under [`data/2026/giro-d-italia/`](data/2026/giro-d-italia/) when stages finish. Changes are published via pull request for review—not pushed directly to `main`.
+Daily [Cursor SDK](https://cursor.com/docs/sdk/typescript) agent (local runtime on GitHub Actions) that updates **Giro d'Italia 2026** results under [`data/2026/giro-d-italia/`](data/2026/giro-d-italia/) when stages finish. Changes land on `main` via an automated pull request that the workflow merges when GitHub allows it.
 
 ## Schedule
 
-- **Automatic:** daily at 07:00 UTC (`.github/workflows/update-cycling-data.yml`)
+- **Automatic:** once daily at **18:00 UTC** (= 20:00 CEST in summer; 19:00 CET in winter)
 - **Manual:** Actions → *Update cycling data* → *Run workflow* (optional prompt override)
 
 ## Setup
 
 1. Add repository secret **`CURSOR_API_KEY`** ([Cursor dashboard](https://cursor.com/dashboard)).
-2. Allow the workflow to **open pull requests** (required for automatic PRs):
+2. Allow the workflow to **create, approve, and merge pull requests**:
    - **Recommended:** GitHub repo → **Settings** → **Actions** → **General** → **Workflow permissions** → enable **Allow GitHub Actions to create and approve pull requests**, then save.
-   - **Alternative:** Add secret **`GH_PR_TOKEN`** — a fine-grained or classic PAT with `contents` and `pull_requests` on this repo. The workflow uses it instead of `GITHUB_TOKEN` for `gh pr create`.
+   - **Alternative:** Add secret **`GH_PR_TOKEN`** — a PAT with `contents` and `pull_requests` on this repo (used for `gh` instead of `GITHUB_TOKEN`).
 
-   If PR creation is blocked, the workflow still **pushes** `bot/giro-d-italia-2026` and prints a compare link in the log; open the PR manually once.
+   If branch protection requires reviews or checks, allow the `github-actions[bot]` to bypass or merge when checks pass; otherwise the workflow pushes the branch and logs a manual merge link.
 
 ## What gets updated
 
@@ -28,7 +28,7 @@ Static assets (GPX, teams, climbs, route features) are not updated by the bot. S
 
 ## Pull requests
 
-The workflow commits to branch `bot/giro-d-italia-2026` and opens a PR if none is open; later runs push additional commits to the same branch. Merge when the diff looks correct. Rebase the bot branch on `main` if GitHub reports conflicts.
+Each run commits to `bot/giro-d-italia-2026`, opens a PR if needed, then **merges** it into the default branch and deletes the bot branch (`gh pr merge --merge --admin --delete-branch`). The next run creates a fresh branch from `main`.
 
 ## Local run
 

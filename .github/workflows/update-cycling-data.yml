@@ -1,8 +1,9 @@
 name: Update cycling data
 
 on:
+  # 18:00 UTC = 20:00 CEST (summer Germany). In winter (CET) this is 19:00 local.
   schedule:
-    - cron: "0 7 * * *"
+    - cron: "0 18 * * *"
   workflow_dispatch:
     inputs:
       prompt:
