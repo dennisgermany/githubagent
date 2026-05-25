@@ -35,6 +35,7 @@ jobs:
         env:
           CURSOR_API_KEY: ${{ secrets.CURSOR_API_KEY }}
           AGENT_PROMPT: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.prompt || '' }}
+          AGENT_LOG_LEVEL: info
         run: npm run agent
 
       - name: Publish data changes as pull request

@@ -34,7 +34,15 @@ npm ci
 npm run agent
 ```
 
-Optional: `AGENT_PROMPT='...'` to override the default prompt file.
+Optional environment variables:
+
+| Variable | Default | Purpose |
+|----------|---------|---------|
+| `AGENT_PROMPT` | (file) | Override `prompts/update-giro-2026.md` |
+| `AGENT_LOG_LEVEL` | `info` | `error` · `warn` · `info` · `debug` |
+| `AGENT_LOG_FORMAT` | text | Set to `json` for JSON lines on stderr |
+
+Logs (thinking, tools, status, steps) go to **stderr**; the final agent summary is printed to **stdout** after the run completes.
 
 ## Future races
 
