@@ -197,7 +197,7 @@ export const giroItalia2026Stages = [
     startLocation: 'Bellinzona',
     finishLocation: 'Carì',
     currentStage: 'Stage 16 — 113 km (Bellinzona → Carì), mountain (Switzerland)',
-    status: 'upcoming',
+    status: 'finished',
     gpxUrl: '/gpx/giro-d-italia-2026/stage-16-route.gpx',
   },
   {
