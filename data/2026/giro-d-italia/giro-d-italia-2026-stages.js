@@ -209,7 +209,7 @@ export const giroItalia2026Stages = [
     startLocation: "Cassano d'Adda",
     finishLocation: 'Andalo',
     currentStage: 'Stage 17 — 200 km (Cassano d’Adda → Andalo), hilly',
-    status: 'upcoming',
+    status: 'finished',
     gpxUrl: '/gpx/giro-d-italia-2026/stage-17-route.gpx',
   },
   {
