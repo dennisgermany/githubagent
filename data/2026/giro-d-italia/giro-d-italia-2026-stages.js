@@ -221,7 +221,7 @@ export const giroItalia2026Stages = [
     startLocation: 'Fai della Paganella',
     finishLocation: 'Pieve di Soligo',
     currentStage: 'Stage 18 — 167 km (Fai della Paganella → Pieve di Soligo), flat',
-    status: 'upcoming',
+    status: 'finished',
     gpxUrl: '/gpx/giro-d-italia-2026/stage-18-route.gpx',
   },
   {

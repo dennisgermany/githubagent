@@ -1,10 +1,10 @@
 /**
- * Men Elite results — 2026 Giro d'Italia (stages 1–17).
+ * Men Elite results — 2026 Giro d'Italia (stages 1–18).
  * Top 25 per stage; row shape matches other multi-stage seeds.
- * Sources: https://bikeraceinfo.com/giro/giro2026.html (stage 17, 27 May 2026); team labels match giro-d-italia-2026-teams.js.
+ * Sources: https://bikeraceinfo.com/giro/giro2026.html (stage 18, 28 May 2026); team labels match giro-d-italia-2026-teams.js.
  */
 export const giroItalia2026ProvisionalGcRiderResults = [
-  { rank: 1, bib: 171, name: 'Jonas Vingegaard', nationality: 'Denmark', team: 'Team Visma | Lease a Bike', time: '66:57:14' },
+  { rank: 1, bib: 171, name: 'Jonas Vingegaard', nationality: 'Denmark', team: 'Team Visma | Lease a Bike', time: '70:44:04' },
   { rank: 2, bib: 31, name: 'Felix Gall', nationality: 'Austria', team: 'Decathlon CMA CGM Team', time: '+4:03' },
   { rank: 3, bib: 92, name: 'Thymen Arensman', nationality: 'Netherlands', team: 'Netcompany INEOS Cycling Team', time: '+4:27' },
   { rank: 4, bib: 121, name: 'Jai Hindley', nationality: 'Australia', team: 'Red Bull - BORA - hansgrohe', time: '+5:00' },
@@ -17,18 +17,18 @@ export const giroItalia2026ProvisionalGcRiderResults = [
   { rank: 11, bib: 91, name: 'Egan Bernal', nationality: 'Colombia', team: 'Netcompany INEOS Cycling Team', time: '+9:44' },
   { rank: 12, bib: 186, name: 'Mathys Rondel', nationality: 'France', team: 'Tudor Pro Cycling Team', time: '+10:03' },
   { rank: 13, bib: 113, name: 'David de la Cruz', nationality: 'Spain', team: 'Pinarello Q36.5 Pro Cycling Team', time: '+10:50' },
-  { rank: 14, bib: 116, name: 'Chris Harper', nationality: 'Australia', team: 'Pinarello Q36.5 Pro Cycling Team', time: '+11:19' },
+  { rank: 14, bib: 116, name: 'Chris Harper', nationality: 'Australia', team: 'Pinarello Q36.5 Pro Cycling Team', time: '+12:59' },
   { rank: 15, bib: 34, name: 'Gregor Mühlberger', nationality: 'Austria', team: 'Decathlon CMA CGM Team', time: '+16:54' },
   { rank: 16, bib: 102, name: 'Jan Hirt', nationality: 'Czech Republic', team: 'NSN Cycling Team', time: '+17:46' },
-  { rank: 17, bib: 214, name: 'Johannes Kulset', nationality: 'Norway', team: 'Uno-X Mobility', time: '+19:23' },
-  { rank: 18, bib: 192, name: 'Igor Arrieta', nationality: 'Spain', team: 'UAE Team Emirates - XRG', time: '+27:26' },
-  { rank: 19, bib: 125, name: 'Giulio Pellizzari', nationality: 'Italy', team: 'Red Bull - BORA - hansgrohe', time: '+30:52' },
-  { rank: 20, bib: 61, name: 'Giulio Ciccone', nationality: 'Italy', team: 'Lidl - Trek', time: '+38:58' },
+  { rank: 17, bib: 175, name: 'Sepp Kuss', nationality: 'United States', team: 'Team Visma | Lease a Bike', time: '+18:07' },
+  { rank: 18, bib: 214, name: 'Johannes Kulset', nationality: 'Norway', team: 'Uno-X Mobility', time: '+19:23' },
+  { rank: 19, bib: 192, name: 'Igor Arrieta', nationality: 'Spain', team: 'UAE Team Emirates - XRG', time: '+31:26' },
+  { rank: 20, bib: 125, name: 'Giulio Pellizzari', nationality: 'Italy', team: 'Red Bull - BORA - hansgrohe', time: '+36:59' },
   { rank: 21, bib: 127, name: 'Aleksandr Vlasov', nationality: 'Russia', team: 'Red Bull - BORA - hansgrohe', time: '+39:51' },
-  { rank: 22, bib: 43, name: 'Markel Beloki', nationality: 'Spain', team: 'EF Education - EasyPost', time: '+41:09' },
-  { rank: 23, bib: 122, name: 'Giovanni Aleotti', nationality: 'Italy', team: 'Red Bull - BORA - hansgrohe', time: '+45:17' },
-  { rank: 24, bib: 81, name: 'Enric Mas', nationality: 'Spain', team: 'Movistar Team', time: '+48:01' },
-  { rank: 25, bib: 96, name: 'Embret Svestad-Bårdseng', nationality: 'Norway', team: 'Netcompany INEOS Cycling Team', time: '+53:40' },
+  { rank: 22, bib: 207, name: 'Wout Poels', nationality: 'Netherlands', team: 'Unibet Rose Rockets', time: '+43:12' },
+  { rank: 23, bib: 43, name: 'Markel Beloki', nationality: 'Spain', team: 'EF Education - EasyPost', time: '+44:13' },
+  { rank: 24, bib: 61, name: 'Giulio Ciccone', nationality: 'Italy', team: 'Lidl - Trek', time: 's.t.' },
+  { rank: 25, bib: 122, name: 'Giovanni Aleotti', nationality: 'Italy', team: 'Red Bull - BORA - hansgrohe', time: '+45:17' },
 ];
 
 export const giroItalia2026StageRiderResultsByStageId = {
@@ -490,5 +490,32 @@ export const giroItalia2026StageRiderResultsByStageId = {
   { rank: 23, bib: 57, name: 'Rémy Rochas', nationality: 'France', team: 'Groupama - FDJ United', time: 's.t.' },
   { rank: 24, bib: 72, name: 'Toon Aerts', nationality: 'Belgium', team: 'Lotto - Intermarché', time: 's.t.' },
   { rank: 25, bib: 143, name: 'Koen Bouwman', nationality: 'Netherlands', team: 'Team Jayco AlUla', time: 's.t.' },
+  ],
+  'stage-18': [
+  { rank: 1, bib: 131, name: 'Paul Magnier', nationality: 'France', team: 'Soudal Quick-Step', time: '3:46:50' },
+  { rank: 2, bib: 18, name: 'Edoardo Zambanini', nationality: 'Italy', team: 'Bahrain Victorious', time: 's.t.' },
+  { rank: 3, bib: 65, name: 'Jonathan Milan', nationality: 'Italy', team: 'Lidl - Trek', time: 's.t.' },
+  { rank: 4, bib: 3, name: 'Francesco Busatto', nationality: 'Italy', team: 'Alpecin-Premier Tech', time: 's.t.' },
+  { rank: 5, bib: 107, name: 'Corbin Strong', nationality: 'New Zealand', team: 'NSN Cycling Team', time: 's.t.' },
+  { rank: 6, bib: 227, name: 'Thomas Silva', nationality: 'Argentina', team: 'XDS Astana Team', time: 's.t.' },
+  { rank: 7, bib: 44, name: 'Madis Mihkels', nationality: 'Estonia', team: 'EF Education - EasyPost', time: 's.t.' },
+  { rank: 8, bib: 21, name: 'Filippo Magli', nationality: 'Italy', team: 'Bardiani - CSF 7 Saber', time: 's.t.' },
+  { rank: 9, bib: 217, name: 'Sakarias Koller Løland', nationality: 'Norway', team: 'Uno-X Mobility', time: 's.t.' },
+  { rank: 10, bib: 205, name: 'Lukas Kubis', nationality: 'Slovakia', team: 'Unibet Rose Rockets', time: 's.t.' },
+  { rank: 11, bib: 98, name: 'Ben Turner', nationality: 'United Kingdom', team: 'Netcompany INEOS Cycling Team', time: 's.t.' },
+  { rank: 12, bib: 135, name: 'Jasper Stuyven', nationality: 'Belgium', team: 'Soudal Quick-Step', time: 's.t.' },
+  { rank: 13, bib: 72, name: 'Toon Aerts', nationality: 'Belgium', team: 'Lotto - Intermarché', time: 's.t.' },
+  { rank: 14, bib: 115, name: 'David González', nationality: 'Spain', team: 'Pinarello Q36.5 Pro Cycling Team', time: 's.t.' },
+  { rank: 15, bib: 127, name: 'Aleksandr Vlasov', nationality: 'Russia', team: 'Red Bull - BORA - hansgrohe', time: 's.t.' },
+  { rank: 16, bib: 85, name: 'Lorenzo Milesi', nationality: 'Italy', team: 'Movistar Team', time: 's.t.' },
+  { rank: 17, bib: 82, name: 'Orluis Aular', nationality: 'Venezuela', team: 'Movistar Team', time: 's.t.' },
+  { rank: 18, bib: 195, name: 'Jhonatan Narvaez', nationality: 'Ecuador', team: 'UAE Team Emirates - XRG', time: 's.t.' },
+  { rank: 19, bib: 32, name: 'Tobias Lund Andresen', nationality: 'Denmark', team: 'Decathlon CMA CGM Team', time: 's.t.' },
+  { rank: 20, bib: 167, name: 'Diego Sevilla', nationality: 'Spain', team: 'Team Polti VisitMalta', time: 's.t.' },
+  { rank: 21, bib: 162, name: 'Ludovico Crescioli', nationality: 'Italy', team: 'Team Polti VisitMalta', time: 's.t.' },
+  { rank: 22, bib: 187, name: 'Florian Stork', nationality: 'Germany', team: 'Tudor Pro Cycling Team', time: 's.t.' },
+  { rank: 23, bib: 166, name: 'Thomas Pesenti', nationality: 'Italy', team: 'Team Polti VisitMalta', time: 's.t.' },
+  { rank: 24, bib: 83, name: 'Iván García Cortina', nationality: 'Spain', team: 'Movistar Team', time: 's.t.' },
+  { rank: 25, bib: 214, name: 'Johannes Kulset', nationality: 'Norway', team: 'Uno-X Mobility', time: 's.t.' },
   ],
 };
